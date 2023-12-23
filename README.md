@@ -153,6 +153,54 @@ body:has(dialog[open]) {
   overflow: hidden;
 }
 ```
-Try it in action: [link](https://codepen.io/alexgriss/pen/XWOyVKj).
 
-<h1 align="center">In progress. Will be updated.</h1>
+**Closing the dialog by clicking on the free area**
+This is a standard UX scenario for a modal window and can be implemented in several ways. I suggest exploring two solutions to this problem:
+
+*Method based on the features of the* `::backdrop`
+
+   Clicking on the pseudo-element backdrop is considered as a click on the dialog element itself. Therefore, if you wrap the entire content of the modal window in an additional `<div>` and then cover the dialog element with it, you can determine whether the click was directed to the backdrop or the content of the modal window.
+
+   Don't forget to reset the default browser styles of margins and borders for the `<dialog>` element to prevent accidentally closing the modal window when clicking on them:
+```
+dialog {
+  padding: 0;
+  border: none;
+}
+```
+
+Now we apply the styling for the window's common borders and margins only to the inner wrapper.
+
+Now, let's write a function that will close the modal window only when clicking on the backdrop, not on the inner wrapper element:
+
+```
+const handleModalClick = ({ currentTarget, target }) => {
+  const isClickedOnBackdrop = target === currentTarget;
+
+  if (isClickedOnBackdrop) {
+    currentTarget.close();
+  }
+}
+
+modalElement.addEventListener("click", handleModalClick);
+```
+*Method based on detecting dialog window dimensions*
+
+Unlike the first method, which required wrapping the inner content of the modal window in an additional element, this method does not require the use of an additional wrapper. All that is needed is to check whether the cursor coordinates extend beyond the area of the window element when clicked:
+
+```
+const handleModalClick = (event) => {
+  const modalRect = modalElement.getBoundingClientRect();
+
+  if (
+    event.clientX < modalRect.left ||
+    event.clientX > modalRect.right ||
+    event.clientY < modalRect.top ||
+    event.clientY > modalRect.bottom
+  ) {
+    modalElement.close();
+  }
+};
+
+modalElement.addEventListener("click", handleModalClick);
+```
