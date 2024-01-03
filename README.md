@@ -200,6 +200,7 @@ const handleModalClick = (event) => {
   ) {
     modalElement.close();
   }
+
 };
 
 modalElement.addEventListener("click", handleModalClick);
